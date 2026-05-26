@@ -62,7 +62,25 @@ async function apiFootballFetch<T>(path: string, params: Record<string, string |
     throw new Error(`API-Football request failed with ${response.status}.`);
   }
 
-  return (await response.json()) as T;
+  const payload = (await response.json()) as T & { errors?: unknown };
+  const providerError = formatProviderError(payload.errors);
+  if (providerError) {
+    throw new Error(providerError);
+  }
+
+  return payload;
+}
+
+function formatProviderError(errors: unknown) {
+  if (!errors) return "";
+  if (Array.isArray(errors) && errors.length === 0) return "";
+  if (typeof errors === "object" && Object.keys(errors).length === 0) return "";
+  if (typeof errors === "string") return errors;
+  if (Array.isArray(errors)) return errors.map(String).join(" ");
+  if (typeof errors === "object") {
+    return Object.values(errors as Record<string, unknown>).map(String).join(" ");
+  }
+  return "API-Football returned an error.";
 }
 
 function mapStatus(short?: string): FixtureStatus {
