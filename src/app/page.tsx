@@ -1,6 +1,6 @@
 "use client";
 
-import { AlertTriangle, BarChart3, CalendarDays, RefreshCw, ShieldCheck, Sparkles } from "lucide-react";
+import { AlertTriangle, BarChart3, CalendarDays, RefreshCw, Satellite, ShieldCheck, Sparkles } from "lucide-react";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { formatKickoff, getWeekWindow } from "@/lib/date";
 import { MAIN_LEAGUES } from "@/lib/leagues";
@@ -117,6 +117,13 @@ export default function Home() {
         <div className="notice">
           <AlertTriangle size={18} />
           Add <code>API_FOOTBALL_KEY</code> to use live fixtures. Demo data is showing now.
+        </div>
+      ) : null}
+
+      {!usingMockData ? (
+        <div className="notice success">
+          <Satellite size={18} />
+          Live API-Football data is enabled. Provider plan limits may still affect available seasons, leagues, and stats.
         </div>
       ) : null}
 
