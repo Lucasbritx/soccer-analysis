@@ -1,6 +1,6 @@
 "use client";
 
-import { AlertTriangle, BarChart3, CalendarDays, RefreshCw, Satellite, ShieldCheck, Sparkles } from "lucide-react";
+import { AlertTriangle, BarChart3, BrainCircuit, CalendarDays, RefreshCw, Satellite, ShieldCheck, Sparkles } from "lucide-react";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { formatKickoff, getWeekWindow } from "@/lib/date";
 import { MAIN_LEAGUES } from "@/lib/leagues";
@@ -35,6 +35,16 @@ export default function Home() {
   const [fixtureProvider, setFixtureProvider] = useState<FixtureProvider>("mock");
   const [providerWarning, setProviderWarning] = useState("");
 
+  const selectFixture = useCallback(
+    (fixture: Fixture) => {
+      setSelectedFixture(fixture);
+      if (analysis?.fixture.id !== fixture.id) {
+        setAnalysis(null);
+      }
+    },
+    [analysis?.fixture.id]
+  );
+
   const loadFixtures = useCallback(async () => {
     setLoadingFixtures(true);
     setError("");
@@ -58,6 +68,7 @@ export default function Home() {
   }, [selectedLeague, week.from, week.to]);
 
   const loadAnalysis = useCallback(async (fixture: Fixture) => {
+    setSelectedFixture(fixture);
     setAnalysis(null);
     setLoadingAnalysis(true);
 
@@ -76,12 +87,6 @@ export default function Home() {
   useEffect(() => {
     void loadFixtures();
   }, [loadFixtures]);
-
-  useEffect(() => {
-    if (selectedFixture) {
-      void loadAnalysis(selectedFixture);
-    }
-  }, [loadAnalysis, selectedFixture]);
 
   return (
     <main className="app-shell">
@@ -161,18 +166,27 @@ export default function Home() {
 
           <div className="fixture-items">
             {fixtures.map((fixture) => (
-              <button
+              <article
                 className={`fixture-row ${selectedFixture?.id === fixture.id ? "active" : ""}`}
                 key={fixture.id}
-                type="button"
-                onClick={() => setSelectedFixture(fixture)}
               >
-                <span className="league-name">{fixture.league.name}</span>
-                <strong>
-                  {fixture.home.name} <span>vs</span> {fixture.away.name}
-                </strong>
-                <small>{formatKickoff(fixture.kickoff)}</small>
-              </button>
+                <button className="fixture-select" type="button" onClick={() => selectFixture(fixture)}>
+                  <span className="league-name">{fixture.league.name}</span>
+                  <strong>
+                    {fixture.home.name} <span>vs</span> {fixture.away.name}
+                  </strong>
+                  <small>{formatKickoff(fixture.kickoff)}</small>
+                </button>
+                <button
+                  className="run-analysis-button"
+                  type="button"
+                  disabled={loadingAnalysis && selectedFixture?.id === fixture.id}
+                  onClick={() => loadAnalysis(fixture)}
+                >
+                  <BrainCircuit size={16} />
+                  {loadingAnalysis && selectedFixture?.id === fixture.id ? "Running..." : "Run Analysis"}
+                </button>
+              </article>
             ))}
           </div>
         </aside>
@@ -189,8 +203,23 @@ export default function Home() {
                 </h2>
                 <p>{formatKickoff(selectedFixture.kickoff)}</p>
               </div>
-              <span className="status-pill">{selectedFixture.status}</span>
+              <div className="match-actions">
+                <span className="status-pill">{selectedFixture.status}</span>
+                <button
+                  className="run-analysis-button"
+                  type="button"
+                  disabled={loadingAnalysis}
+                  onClick={() => loadAnalysis(selectedFixture)}
+                >
+                  <BrainCircuit size={16} />
+                  {loadingAnalysis ? "Running..." : "Run Analysis"}
+                </button>
+              </div>
             </div>
+          ) : null}
+
+          {selectedFixture && !analysis && !loadingAnalysis ? (
+            <div className="state">Select Run Analysis when you want Codex SDK to calculate this match.</div>
           ) : null}
 
           {loadingAnalysis ? <div className="state">Calculating probabilities and generating AI notes...</div> : null}
