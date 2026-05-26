@@ -2,7 +2,6 @@ import { Codex } from "@openai/codex-sdk";
 import { AIInsight, Fixture, ProbabilityBundle } from "@/lib/types";
 
 const DEFAULT_MODEL = "gpt-5.3-codex";
-const CODEX_TIMEOUT_MS = 8_000;
 const AI_INSIGHT_SCHEMA = {
   type: "object",
   properties: {
@@ -72,12 +71,6 @@ export function parseAIInsight(text: string): Omit<AIInsight, "generatedAt" | "p
 }
 
 export async function generateAIInsight(fixture: Fixture, probabilities: ProbabilityBundle): Promise<AIInsight> {
-  const useCodex = Boolean(process.env.CODEX_API_KEY || process.env.CODEX_USE_LOCAL_AUTH === "true");
-
-  if (!useCodex) {
-    return fallbackInsight(fixture, probabilities);
-  }
-
   try {
     const codex = new Codex({
       apiKey: process.env.CODEX_API_KEY,
@@ -110,8 +103,7 @@ export async function generateAIInsight(fixture: Fixture, probabilities: Probabi
         }
       ],
       {
-        outputSchema: AI_INSIGHT_SCHEMA,
-        signal: AbortSignal.timeout(CODEX_TIMEOUT_MS)
+        outputSchema: AI_INSIGHT_SCHEMA
       }
     );
 

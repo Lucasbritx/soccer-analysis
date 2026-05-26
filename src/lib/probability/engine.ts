@@ -126,7 +126,7 @@ export function calculateProbabilities(fixture: Fixture, trends: TrendPair): Pro
   return {
     fixtureId: fixture.id,
     generatedAt: new Date().toISOString(),
-    sourceFreshness: process.env.API_FOOTBALL_KEY ? "API-Football cached up to 15 minutes" : "Demo data, no API key configured",
+    sourceFreshness: "Fixture provider data cached up to 15 minutes; betting-stat trends use available provider fields and local baselines.",
     trends,
     warnings,
     markets: [

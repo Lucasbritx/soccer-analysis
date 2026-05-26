@@ -80,3 +80,11 @@ export type FixtureQuery = {
   to: string;
   leagueIds?: number[];
 };
+
+export type FixtureProvider = "football-data" | "thesportsdb" | "mock";
+
+export type FixtureListResult = {
+  fixtures: Fixture[];
+  provider: FixtureProvider;
+  warning?: string;
+};

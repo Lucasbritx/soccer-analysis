@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server";
 import { generateAIInsight } from "@/lib/ai/insights";
 import { calculateProbabilities } from "@/lib/probability/engine";
-import { getFixtureById, getFixtureTrends } from "@/lib/providers/apiFootball";
+import { getFixtureById, getFixtureTrends } from "@/lib/providers/footballProviders";
 
 type RouteContext = {
   params: Promise<{ id: string }>;

@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server";
 import { getWeekWindow } from "@/lib/date";
 import { MAIN_LEAGUE_IDS } from "@/lib/leagues";
-import { getWeeklyFixtures } from "@/lib/providers/apiFootball";
+import { getWeeklyFixtures } from "@/lib/providers/footballProviders";
 
 export async function GET(request: Request) {
   const url = new URL(request.url);
@@ -14,18 +14,20 @@ export async function GET(request: Request) {
     .filter(Number.isFinite);
 
   try {
-    const fixtures = await getWeeklyFixtures({
+    const result = await getWeeklyFixtures({
       from,
       to,
       leagueIds: leagues.length ? leagues : MAIN_LEAGUE_IDS
     });
 
     return NextResponse.json({
-      fixtures,
+      fixtures: result.fixtures,
       meta: {
         from,
         to,
-        usingMockData: !process.env.API_FOOTBALL_KEY
+        provider: result.provider,
+        usingMockData: result.provider === "mock",
+        warning: result.warning
       }
     });
   } catch (error) {

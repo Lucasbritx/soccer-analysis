@@ -4,14 +4,16 @@ import { AlertTriangle, BarChart3, CalendarDays, RefreshCw, Satellite, ShieldChe
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { formatKickoff, getWeekWindow } from "@/lib/date";
 import { MAIN_LEAGUES } from "@/lib/leagues";
-import { Fixture, FixtureAnalysis } from "@/lib/types";
+import { Fixture, FixtureAnalysis, FixtureProvider } from "@/lib/types";
 
 type FixturesResponse = {
   fixtures: Fixture[];
   meta?: {
     from: string;
     to: string;
+    provider: "football-data" | "thesportsdb" | "mock";
     usingMockData: boolean;
+    warning?: string;
   };
   error?: string;
 };
@@ -30,6 +32,8 @@ export default function Home() {
   const [loadingAnalysis, setLoadingAnalysis] = useState(false);
   const [error, setError] = useState("");
   const [usingMockData, setUsingMockData] = useState(false);
+  const [fixtureProvider, setFixtureProvider] = useState<FixtureProvider>("mock");
+  const [providerWarning, setProviderWarning] = useState("");
 
   const loadFixtures = useCallback(async () => {
     setLoadingFixtures(true);
@@ -43,6 +47,8 @@ export default function Home() {
       if (!response.ok) throw new Error(data.error ?? "Unable to load fixtures.");
       setFixtures(data.fixtures);
       setUsingMockData(Boolean(data.meta?.usingMockData));
+      setFixtureProvider(data.meta?.provider ?? "mock");
+      setProviderWarning(data.meta?.warning ?? "");
       setSelectedFixture(data.fixtures[0] ?? null);
     } catch (caught) {
       setError(caught instanceof Error ? caught.message : "Unable to load fixtures.");
@@ -116,14 +122,23 @@ export default function Home() {
       {usingMockData ? (
         <div className="notice">
           <AlertTriangle size={18} />
-          Add <code>API_FOOTBALL_KEY</code> to use live fixtures. Demo data is showing now.
+          Live providers did not return fixtures. Demo data is showing now.
         </div>
       ) : null}
 
       {!usingMockData ? (
         <div className="notice success">
           <Satellite size={18} />
-          Live API-Football data is enabled. Provider plan limits may still affect available seasons, leagues, and stats.
+          {fixtureProvider === "football-data"
+            ? "Live football-data.org fixtures are enabled."
+            : "Live TheSportsDB fallback fixtures are enabled."}
+        </div>
+      ) : null}
+
+      {providerWarning ? (
+        <div className="notice">
+          <AlertTriangle size={18} />
+          {providerWarning}
         </div>
       ) : null}
 
