@@ -44,12 +44,13 @@ Configure the values you want:
 ```env
 API_FOOTBALL_KEY=your_api_football_key
 CODEX_API_KEY=your_optional_codex_api_key
+CODEX_USE_LOCAL_AUTH=false
 CODEX_MODEL=gpt-5.3-codex
 ```
 
 `API_FOOTBALL_KEY` enables live soccer data. Without it, the app shows demo fixtures.
 
-`CODEX_API_KEY` is optional for local development if your Codex CLI/session is already authenticated. Without Codex access, the app still works and uses fallback research notes.
+`CODEX_API_KEY` enables live Codex SDK insights in hosted or explicit API-key environments. For local development with an already-authenticated Codex CLI/session, set `CODEX_USE_LOCAL_AUTH=true`. Without Codex access, the app still works and uses fallback research notes.
 
 ## Run Locally
 
