@@ -20,7 +20,7 @@ export async function GET(request: Request) {
     const result = await getWeeklyFixtures({
       from,
       to,
-      competition: competition ?? undefined,
+      competition,
       leagueIds: leagues.length ? leagues : MAIN_LEAGUE_IDS
     });
 
