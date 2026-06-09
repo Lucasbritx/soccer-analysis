@@ -1,5 +1,6 @@
 import { getLeagueById, MAIN_LEAGUES } from "@/lib/leagues";
 import { mockFixtures, mockTrends } from "@/lib/mock/fixtures";
+import { worldCupFixtures, worldCupTrends } from "@/lib/mock/worldCup";
 import { Fixture, FixtureListResult, FixtureQuery, FixtureStatus, TeamTrend } from "@/lib/types";
 
 const FOOTBALL_DATA_BASE = "https://api.football-data.org/v4";
@@ -85,6 +86,11 @@ function findLeagueByFootballDataCode(code: string) {
 
 function findLeagueBySportsDbId(id: number) {
   return MAIN_LEAGUES.find((league) => league.sportsDbId === id);
+}
+
+function isWithinRange(isoDate: string, from: string, to: string) {
+  const day = isoDate.slice(0, 10);
+  return day >= from && day <= to;
 }
 
 async function footballDataFetch(path: string, params: Record<string, string | number>) {
@@ -226,7 +232,18 @@ async function getSportsDbFixtures(query: FixtureQuery): Promise<Fixture[]> {
   return fixtures.flat().sort((a, b) => a.kickoff.localeCompare(b.kickoff));
 }
 
+function getWorldCupFixtures(query: FixtureQuery): Fixture[] {
+  return worldCupFixtures.filter((fixture) => isWithinRange(fixture.kickoff, query.from, query.to));
+}
+
 export async function getWeeklyFixtures(query: FixtureQuery): Promise<FixtureListResult> {
+  if (query.competition === "world-cup") {
+    return {
+      fixtures: getWorldCupFixtures(query),
+      provider: "world-cup"
+    };
+  }
+
   if (hasFootballDataKey()) {
     try {
       const fixtures = await getFootballDataFixtures(query);
@@ -260,15 +277,20 @@ export async function getWeeklyFixtures(query: FixtureQuery): Promise<FixtureLis
 }
 
 export async function getFixtureById(id: number): Promise<Fixture | undefined> {
+  const worldCupFixture = worldCupFixtures.find((fixture) => fixture.id === id);
+  if (worldCupFixture) {
+    return worldCupFixture;
+  }
+
   if (hasFootballDataKey()) {
-  try {
-    const data = await footballDataFetch(`/matches/${id}`, {});
-    const match = data.matches?.[0] ?? (data.id ? (data as FootballDataMatch) : undefined);
-    if (match?.homeTeam && match.awayTeam && match.competition) {
-      const league = match.competition.code ? findLeagueByFootballDataCode(match.competition.code) : undefined;
-      return mapFootballDataFixture(match, league?.id ?? MAIN_LEAGUES[0].id);
-    }
-  } catch {
+    try {
+      const data = await footballDataFetch(`/matches/${id}`, {});
+      const match = data.matches?.[0] ?? (data.id ? (data as FootballDataMatch) : undefined);
+      if (match?.homeTeam && match.awayTeam && match.competition) {
+        const league = match.competition.code ? findLeagueByFootballDataCode(match.competition.code) : undefined;
+        return mapFootballDataFixture(match, league?.id ?? MAIN_LEAGUES[0].id);
+      }
+    } catch {
       // Continue to TheSportsDB and mock fallbacks.
     }
   }
@@ -288,5 +310,9 @@ export async function getFixtureById(id: number): Promise<Fixture | undefined> {
 }
 
 export async function getFixtureTrends(fixture: Fixture): Promise<{ home: TeamTrend; away: TeamTrend }> {
+  if (worldCupFixtures.some((item) => item.id === fixture.id)) {
+    return worldCupTrends(fixture);
+  }
+
   return mockTrends(fixture);
 }

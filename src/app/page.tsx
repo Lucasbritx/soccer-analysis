@@ -4,14 +4,15 @@ import { AlertTriangle, BarChart3, BrainCircuit, CalendarDays, RefreshCw, Satell
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { formatKickoff, getWeekWindow } from "@/lib/date";
 import { MAIN_LEAGUES } from "@/lib/leagues";
-import { Fixture, FixtureAnalysis, FixtureProvider } from "@/lib/types";
+import { Fixture, FixtureAnalysis, FixtureProvider, FixtureCompetition } from "@/lib/types";
 
 type FixturesResponse = {
   fixtures: Fixture[];
   meta?: {
     from: string;
     to: string;
-    provider: "football-data" | "thesportsdb" | "mock";
+    provider: "football-data" | "thesportsdb" | "mock" | "world-cup";
+    competition?: FixtureCompetition;
     usingMockData: boolean;
     warning?: string;
   };
@@ -25,6 +26,7 @@ function confidenceClass(confidence: string) {
 export default function Home() {
   const week = useMemo(() => getWeekWindow(), []);
   const [fixtures, setFixtures] = useState<Fixture[]>([]);
+  const [selectedCompetition, setSelectedCompetition] = useState<FixtureCompetition>("league");
   const [selectedLeague, setSelectedLeague] = useState("all");
   const [selectedFixture, setSelectedFixture] = useState<Fixture | null>(null);
   const [analysis, setAnalysis] = useState<FixtureAnalysis | null>(null);
@@ -49,7 +51,11 @@ export default function Home() {
     setLoadingFixtures(true);
     setError("");
     const params = new URLSearchParams({ from: week.from, to: week.to });
-    if (selectedLeague !== "all") params.append("league", selectedLeague);
+    if (selectedCompetition === "world-cup") {
+      params.set("competition", "world-cup");
+    } else if (selectedLeague !== "all") {
+      params.append("league", selectedLeague);
+    }
 
     try {
       const response = await fetch(`/api/fixtures?${params.toString()}`);
@@ -65,7 +71,7 @@ export default function Home() {
     } finally {
       setLoadingFixtures(false);
     }
-  }, [selectedLeague, week.from, week.to]);
+  }, [selectedCompetition, selectedLeague, week.from, week.to]);
 
   const loadAnalysis = useCallback(async (fixture: Fixture) => {
     setSelectedFixture(fixture);
@@ -109,8 +115,22 @@ export default function Home() {
           </span>
         </div>
         <label className="league-filter">
+          <span>Dataset</span>
+          <select
+            value={selectedCompetition}
+            onChange={(event) => setSelectedCompetition(event.target.value as FixtureCompetition)}
+          >
+            <option value="league">Weekly league fixtures</option>
+            <option value="world-cup">World Cup statistics</option>
+          </select>
+        </label>
+        <label className="league-filter">
           <span>League</span>
-          <select value={selectedLeague} onChange={(event) => setSelectedLeague(event.target.value)}>
+          <select
+            value={selectedLeague}
+            onChange={(event) => setSelectedLeague(event.target.value)}
+            disabled={selectedCompetition === "world-cup"}
+          >
             <option value="all">All main leagues</option>
             {MAIN_LEAGUES.map((league) => (
               <option key={league.id} value={league.id}>
@@ -127,14 +147,18 @@ export default function Home() {
       {usingMockData ? (
         <div className="notice">
           <AlertTriangle size={18} />
-          Live providers did not return fixtures. Demo data is showing now.
+          {fixtureProvider === "world-cup"
+            ? "World Cup statistics are using local tournament data."
+            : "Live providers did not return fixtures. Demo data is showing now."}
         </div>
       ) : null}
 
       {!usingMockData ? (
         <div className="notice success">
           <Satellite size={18} />
-          {fixtureProvider === "football-data"
+          {fixtureProvider === "world-cup"
+            ? "World Cup statistics are enabled."
+            : fixtureProvider === "football-data"
             ? "Live football-data.org fixtures are enabled."
             : "Live TheSportsDB fallback fixtures are enabled."}
         </div>

@@ -1,10 +1,11 @@
 # Soccer Analysis
 
-Soccer Analysis is a Next.js betting-research dashboard for weekly soccer fixtures. It lists games from the main leagues, computes auditable probabilities from structured stats, and uses the Codex SDK to generate short research notes when configured.
+Soccer Analysis is a Next.js betting-research dashboard for weekly soccer fixtures and World Cup statistics. It lists games from the main leagues, computes auditable probabilities from structured stats, and uses the Codex SDK to generate short research notes when configured.
 
 ## Features
 
 - Weekly fixture list for major European leagues and Brasileirao Serie A.
+- World Cup statistics mode with dedicated tournament fixtures and trends.
 - football-data.org integration for live fixture data.
 - TheSportsDB fallback for upcoming fixtures when football-data.org is not configured or unavailable.
 - Demo fixture fallback when no API key is configured.
@@ -51,6 +52,8 @@ CODEX_MODEL=gpt-5.3-codex
 ```
 
 `FOOTBALL_DATA_API_KEY` enables football-data.org as the primary live fixture provider. Without it, the app uses TheSportsDB as a free fallback. If both live providers fail or return no fixtures, the app shows demo fixtures.
+
+The World Cup statistics mode uses bundled tournament fixtures and stats so the app still works without external World Cup APIs.
 
 Codex SDK insights are part of the core analysis flow and run for every fixture analysis request. `CODEX_API_KEY` can be provided for hosted or explicit API-key environments; local development can also use an already-authenticated Codex CLI/session. If the SDK fails or returns malformed output, the app falls back to local research notes so the dashboard remains usable.
 

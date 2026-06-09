@@ -79,9 +79,12 @@ export type FixtureQuery = {
   from: string;
   to: string;
   leagueIds?: number[];
+  competition?: FixtureCompetition;
 };
 
-export type FixtureProvider = "football-data" | "thesportsdb" | "mock";
+export type FixtureProvider = "football-data" | "thesportsdb" | "mock" | "world-cup";
+
+export type FixtureCompetition = "league" | "world-cup";
 
 export type FixtureListResult = {
   fixtures: Fixture[];
