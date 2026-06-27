@@ -8,7 +8,8 @@ export const MAIN_LEAGUES = [
   { id: 5, code: "FL1", sportsDbId: 4334, name: "Ligue 1", country: "France", season: CURRENT_SEASON },
   { id: 6, code: "CL", sportsDbId: 4480, name: "Champions League", country: "Europe", season: CURRENT_SEASON },
   { id: 7, code: "EL", sportsDbId: 4481, name: "Europa League", country: "Europe", season: CURRENT_SEASON },
-  { id: 8, code: "BSA", sportsDbId: 4351, name: "Brasileirao Serie A", country: "Brazil", season: CURRENT_SEASON }
+  { id: 8, code: "BSA", sportsDbId: 4351, name: "Brasileirao Serie A", country: "Brazil", season: CURRENT_SEASON },
+  { id: 9, code: "WC", sportsDbId: 4429, name: "FIFA World Cup", country: "World", season: CURRENT_SEASON }
 ] as const;
 
 export const MAIN_LEAGUE_IDS = MAIN_LEAGUES.map((league) => league.id);
