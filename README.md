@@ -4,7 +4,7 @@ Soccer Analysis is a Next.js betting-research dashboard for weekly soccer fixtur
 
 ## Features
 
-- Weekly fixture list for major European leagues and Brasileirao Serie A.
+- Weekly fixture list for major European leagues, FIFA World Cup, and Brasileirao Serie A.
 - football-data.org integration for live fixture data.
 - TheSportsDB fallback for upcoming fixtures when football-data.org is not configured or unavailable.
 - Demo fixture fallback when no API key is configured.
